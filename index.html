@@ -2404,23 +2404,43 @@ function showResultDetail(session) {
   const resultUrl = `${window.location.href}#result-${session.session_id}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(resultUrl)}`;
 
+  const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(resultUrl)}`;
+  window._resultUrl = resultUrl;
+
   document.getElementById("result-modal-content").innerHTML = `
+    <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid #22c55e;border-radius:16px;padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:16px;">
+      <div style="flex-shrink:0;">
+        <img src="${qrImgUrl}" style="width:110px;height:110px;border-radius:10px;border:2px solid #bbf7d0;display:block;" alt="QR">
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:800;color:#15803d;margin-bottom:6px;">📲 결과 공유</div>
+        <div style="font-size:11px;color:#166534;background:white;border-radius:8px;padding:8px 10px;word-break:break-all;margin-bottom:8px;border:1px solid #bbf7d0;">${resultUrl}</div>
+        <button onclick="copyResultUrl()" style="background:#16a34a;color:white;border:none;border-radius:8px;padding:8px 14px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;width:100%;">📋 링크 복사</button>
+      </div>
+    </div>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <div style="width:48px;height:48px;border-radius:50%;background:${session.gender==="여"?"#fce7f3":"#dbeafe"};display:flex;align-items:center;justify-content:center;font-size:22px;">${session.gender==="여"?"👧":"👦"}</div>
       <div>
         <div style="font-size:18px;font-weight:800;">${session.child_name}</div>
-        <div style="font-size:13px;color:#64748b;">${session.child_age} · ${session.exam_date || ""} · ${session.examiner || ""}</div>
+        <div style="font-size:13px;color:#64748b;">${session.child_age}개월 · ${session.exam_date || ""} · ${session.examiner || ""}</div>
       </div>
     </div>
     ${domainHtml}
     ${extraHtml}
-    <div class="action-row">
+    <div class="action-row" style="margin-top:20px;">
       <button class="btn-primary" onclick="savePDF()" style="flex:1;justify-content:center;">📄 PDF 저장</button>
-      <button class="btn-secondary" onclick="showResultQR('${resultUrl}')" style="background:#6366f1;color:white;border-color:#6366f1;">📲 QR 공유</button>
       <button class="btn-secondary" onclick="document.getElementById('result-modal').style.display='none'">닫기</button>
     </div>
   `;
   document.getElementById("result-modal").style.display = "flex";
+  document.getElementById("result-modal").scrollTop = 0;
+}
+
+function copyResultUrl() {
+  const url = window._resultUrl || "";
+  navigator.clipboard.writeText(url)
+    .then(() => alert("링크가 복사되었습니다"))
+    .catch(() => { prompt("아래 링크를 복사하세요:", url); });
 }
 
 function showResultQR(url) {
