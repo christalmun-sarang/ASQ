@@ -2,638 +2,354 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KASQ 영·유아 발달 선별 검사</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KASQ 영유아 발달 선별검사</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap');
-
   :root {
     --primary: #0d9488;
-    --primary-light: #f0fdfa;
     --primary-dark: #0f766e;
-    --green: #16a34a;
-    --green-light: #f0fdf4;
-    --amber: #d97706;
-    --amber-light: #fffbeb;
-    --red: #dc2626;
-    --red-light: #fef2f2;
-    --purple: #7c3aed;
+    --primary-light: #ccfbf1;
     --slate-50: #f8fafc;
     --slate-100: #f1f5f9;
     --slate-200: #e2e8f0;
-    --slate-400: #94a3b8;
     --slate-500: #64748b;
-    --slate-600: #475569;
     --slate-700: #334155;
-    --slate-800: #1e293b;
     --slate-900: #0f172a;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     font-family: 'Noto Sans KR', sans-serif;
     background: #f0fdf4;
     min-height: 100vh;
-    color: var(--slate-800);
+    color: var(--slate-900);
   }
-
-  .app-header {
-    background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+  .header {
+    background: linear-gradient(135deg, #064e3b 0%, #0d9488 100%);
     color: white;
-    padding: 0;
+    padding: 16px 20px;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 16px rgba(6,78,59,0.35);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
   }
   .header-inner {
-    max-width: 900px;
+    max-width: 700px;
     margin: 0 auto;
-    padding: 14px 24px;
     display: flex;
     align-items: center;
-    gap: 14px;
+    justify-content: space-between;
+    gap: 12px;
   }
-  .header-logo {
-    background: rgba(255,255,255,0.15);
-    border: 1.5px solid rgba(255,255,255,0.3);
-    border-radius: 10px;
-    padding: 6px 14px;
-    font-weight: 900;
-    font-size: 18px;
-    letter-spacing: 2px;
-  }
-  .header-title { font-size: 17px; font-weight: 700; }
+  .header-title { font-size: 16px; font-weight: 800; }
   .header-sub { font-size: 11px; opacity: 0.75; margin-top: 2px; }
-
-  .main { max-width: 900px; margin: 0 auto; padding: 28px 16px 60px; }
-
-  /* 탭 */
-  .main-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-    background: white;
-    border-radius: 14px;
-    padding: 8px;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
-  }
-  .main-tab-btn {
+  .progress-wrap {
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    height: 6px;
     flex: 1;
-    padding: 11px;
-    border: none;
+    max-width: 140px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #6ee7b7;
+    border-radius: 20px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+  .progress-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6ee7b7;
+    white-space: nowrap;
+  }
+
+  .main { max-width: 700px; margin: 0 auto; padding: 20px 16px 100px; }
+
+  /* 화면들 */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* 환영 화면 */
+  .welcome-card {
+    background: white;
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+  }
+  .welcome-emoji { font-size: 48px; margin-bottom: 12px; }
+  .welcome-title { font-size: 22px; font-weight: 900; color: var(--slate-900); margin-bottom: 8px; }
+  .welcome-sub { font-size: 14px; color: var(--slate-500); line-height: 1.6; }
+  .info-box {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--slate-100); }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { font-size: 13px; color: var(--slate-500); }
+  .info-value { font-size: 14px; font-weight: 700; color: var(--slate-900); }
+  .notice-box {
+    background: #fef9c3;
+    border: 1px solid #fde047;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #713f12;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  /* 도메인 섹션 */
+  .domain-section {
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .domain-header {
+    padding: 14px 18px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+  }
+  .domain-badge {
+    color: white;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .domain-cnt { font-size: 12px; color: #64748b; }
+  .domain-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* 문항 카드 */
+  .question-item {
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .question-item.answered { border-color: #22c55e; }
+  .question-text { font-size: 14px; line-height: 1.6; color: var(--slate-700); margin-bottom: 10px; font-weight: 600; }
+  .answer-row { display: flex; gap: 8px; }
+  .answer-btn {
+    flex: 1;
+    padding: 10px 6px;
+    border: 2px solid var(--slate-200);
     border-radius: 10px;
-    background: transparent;
+    background: white;
     font-family: inherit;
     font-size: 14px;
     font-weight: 700;
-    color: var(--slate-500);
+    color: var(--slate-700);
     cursor: pointer;
-    transition: all 0.2s;
+    text-align: center;
+    line-height: 1.4;
+    transition: all 0.15s;
   }
-  .main-tab-btn.active {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 2px 8px rgba(13,148,136,0.35);
-  }
+  .answer-btn:active { transform: scale(0.96); }
+  .answer-btn.sel-1 { background: #fee2e2; border-color: #ef4444; color: #dc2626; }
+  .answer-btn.sel-2 { background: #fef9c3; border-color: #f59e0b; color: #d97706; }
+  .answer-btn.sel-3 { background: #dcfce7; border-color: #22c55e; color: #16a34a; }
+  .answer-btn .ans-label { font-size: 11px; font-weight: 500; display: block; }
 
-  /* 카드 */
-  .card {
+  /* 추가질문 */
+  .extra-q-item {
     background: white;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
-    margin-bottom: 20px;
-  }
-  .card-title {
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--slate-800);
-    margin-bottom: 18px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--slate-100);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  /* 폼 */
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  .form-label { font-size: 12px; font-weight: 700; color: var(--slate-600); text-transform: uppercase; letter-spacing: 0.5px; }
-  .form-input {
-    padding: 11px 14px;
-    border: 2px solid var(--slate-200);
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 14px;
-    color: var(--slate-800);
+    border-radius: 12px;
+    padding: 14px;
+    border: 2px solid transparent;
     transition: border-color 0.2s;
-    background: white;
   }
-  .form-input:focus { outline: none; border-color: var(--primary); }
-  .gender-row { display: flex; gap: 8px; }
-  .gender-btn {
+  .extra-q-item.answered { border-color: #22c55e; }
+  .extra-q-text { font-size: 14px; line-height: 1.6; font-weight: 600; color: var(--slate-700); margin-bottom: 10px; }
+  .yn-row { display: flex; gap: 10px; }
+  .yn-btn {
     flex: 1;
     padding: 10px;
     border: 2px solid var(--slate-200);
     border-radius: 10px;
     background: white;
     font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--slate-600);
-  }
-  .gender-btn.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
-
-  /* 검사 방식 선택 */
-  .mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .mode-card {
-    border: 2px solid var(--slate-200);
-    border-radius: 12px;
-    padding: 16px 10px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: white;
-  }
-  .mode-card:hover { border-color: var(--primary); background: var(--primary-light); }
-  .mode-card.active { border-color: var(--primary); background: var(--primary-light); }
-  .mode-icon { font-size: 24px; display: block; margin-bottom: 6px; }
-  .mode-label { font-size: 12px; font-weight: 700; color: var(--slate-700); }
-
-  /* 버튼 */
-  .btn-primary {
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 13px 24px;
-    font-family: inherit;
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    transition: all 0.15s;
   }
-  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
-  .btn-secondary {
+  .yn-btn:active { transform: scale(0.96); }
+  .yn-btn.yn-y { background: #fee2e2; border-color: #ef4444; color: #dc2626; }
+  .yn-btn.yn-n { background: #dcfce7; border-color: #22c55e; color: #16a34a; }
+
+  /* 버튼 */
+  .btn-primary {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white; border: none; border-radius: 14px;
+    padding: 16px 24px; font-family: inherit; font-size: 16px; font-weight: 800;
+    cursor: pointer; width: 100%;
+    box-shadow: 0 4px 14px rgba(13,148,136,0.35);
+    transition: all 0.2s;
+  }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* 완료 화면 */
+  .done-card {
     background: white;
-    color: var(--slate-700);
-    border: 2px solid var(--slate-200);
-    border-radius: 12px;
-    padding: 11px 20px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
-  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
-
-  /* 세션 목록 */
-  .session-item {
-    border: 1.5px solid var(--slate-200);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    transition: border-color 0.2s;
-    cursor: pointer;
-  }
-  .session-item:hover { border-color: var(--primary); background: var(--primary-light); }
-  .session-avatar {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; font-weight: 900;
-    flex-shrink: 0;
-  }
-  .avatar-m { background: #dbeafe; color: #1d4ed8; }
-  .avatar-f { background: #fce7f3; color: #be185d; }
-  .session-info { flex: 1; min-width: 0; }
-  .session-name { font-size: 15px; font-weight: 800; color: var(--slate-800); }
-  .session-meta { font-size: 12px; color: var(--slate-500); margin-top: 2px; }
-  .badge {
-    padding: 3px 10px;
     border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  .badge-pending { background: var(--amber-light); color: var(--amber); }
-  .badge-done { background: var(--green-light); color: var(--green); }
-
-  /* 필터 */
-  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-  .filter-btn {
-    padding: 7px 16px;
-    border: 1.5px solid var(--slate-200);
-    border-radius: 20px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    background: white;
-    color: var(--slate-600);
-    transition: all 0.2s;
-  }
-  .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
-
-  /* 빈 상태 */
-  .empty-state {
+    padding: 40px 24px;
     text-align: center;
-    padding: 40px;
-    color: var(--slate-400);
-    font-size: 14px;
-    line-height: 2;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
   }
+  .done-emoji { font-size: 56px; margin-bottom: 16px; }
+  .done-title { font-size: 22px; font-weight: 900; margin-bottom: 10px; }
+  .done-sub { font-size: 14px; color: var(--slate-500); line-height: 1.7; }
 
-  /* 모달 */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex; align-items: center; justify-content: center;
+  /* 에러 화면 */
+  .error-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 24px;
+    text-align: center;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+  .error-emoji { font-size: 48px; margin-bottom: 16px; }
+  .error-title { font-size: 18px; font-weight: 800; color: #dc2626; margin-bottom: 8px; }
+  .error-msg { font-size: 13px; color: var(--slate-500); }
+
+  /* 고정 하단 버튼 */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid var(--slate-200);
+    padding: 14px 20px env(safe-area-inset-bottom);
     z-index: 200;
-    padding: 16px;
   }
-  .modal-box {
-    background: white;
-    border-radius: 20px;
-    padding: 28px 24px;
-    max-width: 480px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
+  .bottom-inner { max-width: 700px; margin: 0 auto; }
+
+  /* 로딩 */
+  .loading {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 50vh; gap: 16px;
+    font-size: 15px; color: var(--slate-500); font-weight: 600;
   }
-  .modal-title {
-    font-size: 18px;
-    font-weight: 800;
-    margin-bottom: 20px;
-    color: var(--slate-800);
-  }
-  .modal-close {
-    position: absolute;
-    top: 16px; right: 16px;
-    background: var(--slate-100);
-    border: none;
+  .spinner {
+    width: 40px; height: 40px;
+    border: 4px solid var(--primary-light);
+    border-top-color: var(--primary);
     border-radius: 50%;
-    width: 32px; height: 32px;
-    cursor: pointer;
-    font-size: 16px;
+    animation: spin 0.8s linear infinite;
   }
-
-  /* 연령 선택 */
-  .age-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-  }
-  @media (max-width: 500px) { .age-grid { grid-template-columns: repeat(3, 1fr); } }
-  .age-btn {
-    padding: 10px 4px;
-    border: 2px solid var(--slate-200);
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    background: white;
-    color: var(--slate-600);
-    text-align: center;
-    transition: all 0.2s;
-  }
-  .age-btn:hover { border-color: var(--primary); color: var(--primary); }
-  .age-btn.active { border-color: var(--primary); background: var(--primary); color: white; }
-
-  /* URL/QR 공유 */
-  .url-box {
-    background: var(--slate-50);
-    border: 1.5px solid var(--slate-200);
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-size: 12px;
-    word-break: break-all;
-    color: var(--slate-600);
-    margin-bottom: 12px;
-  }
-  .qr-img { display: block; margin: 0 auto 16px; border-radius: 12px; }
-
-  /* 결과 상세 */
-  .result-section { margin-bottom: 20px; }
-  .result-domain {
-    background: var(--slate-50);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-  }
-  .result-domain-name { font-size: 13px; font-weight: 800; color: var(--slate-700); margin-bottom: 8px; }
-  .result-bar-bg {
-    background: var(--slate-200);
-    border-radius: 20px;
-    height: 10px;
-    overflow: hidden;
-    margin-bottom: 6px;
-  }
-  .result-bar-fill { height: 100%; border-radius: 20px; transition: width 0.5s; }
-  .result-interpret {
-    font-size: 12px;
-    font-weight: 700;
-    padding: 2px 10px;
-    border-radius: 20px;
-    display: inline-block;
-  }
-  .interpret-0 { background: #fee2e2; color: #dc2626; }
-  .interpret-1 { background: #fef3c7; color: #d97706; }
-  .interpret-2 { background: #dbeafe; color: #1d4ed8; }
-  .interpret-3 { background: #dcfce7; color: #16a34a; }
-
-  /* 추가 질문 결과 */
-  .extra-item {
-    font-size: 12px;
-    padding: 6px 10px;
-    border-radius: 8px;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .extra-yes { background: #fee2e2; color: #dc2626; }
-  .extra-no { background: #f0fdf4; color: #16a34a; }
-
-  .action-row {
-    display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;
-  }
-
-  /* 직접 검사 */
-  .domain-tabs {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 18px;
-  }
-  .domain-tab-btn {
-    padding: 7px 14px;
-    border: 2px solid var(--slate-200);
-    border-radius: 20px;
-    font-family: inherit;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    background: white;
-    color: var(--slate-600);
-    transition: all 0.2s;
-  }
-  .domain-tab-btn.active { border-color: var(--primary); background: var(--primary); color: white; }
-
-  .question-item {
-    background: var(--slate-50);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-  }
-  .question-text { font-size: 14px; color: var(--slate-700); line-height: 1.6; margin-bottom: 10px; }
-  .answer-row { display: flex; gap: 8px; }
-  .answer-btn {
-    flex: 1;
-    padding: 8px 6px;
-    border: 2px solid var(--slate-200);
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    background: white;
-    color: var(--slate-600);
-    text-align: center;
-    transition: all 0.2s;
-    line-height: 1.3;
-  }
-  .answer-btn.sel-1 { border-color: #ef4444; background: #fef2f2; color: #ef4444; }
-  .answer-btn.sel-2 { border-color: #f59e0b; background: #fffbeb; color: #d97706; }
-  .answer-btn.sel-3 { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
-
-  .extra-q-item {
-    background: #fefce8;
-    border: 1.5px solid #fde68a;
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .extra-q-text { font-size: 13px; color: #92400e; line-height: 1.5; flex: 1; }
-  .yn-row { display: flex; gap: 6px; flex-shrink: 0; }
-  .yn-btn {
-    padding: 6px 14px;
-    border: 2px solid #fde68a;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    background: white;
-    color: #92400e;
-    transition: all 0.2s;
-  }
-  .yn-btn.yn-y { border-color: #ef4444; background: #fef2f2; color: #ef4444; }
-  .yn-btn.yn-n { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
-
-  .progress-bar {
-    background: var(--slate-200);
-    height: 6px;
-    border-radius: 20px;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--primary);
-    border-radius: 20px;
-    transition: width 0.3s;
-  }
-
-  @media print {
-    .app-header, .main-tabs, .btn-row, .action-row { display: none !important; }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<header class="app-header">
+<div class="header">
   <div class="header-inner">
-    <div class="header-logo">KASQ</div>
     <div>
-      <div class="header-title">영·유아 발달 선별 검사</div>
-      <div class="header-sub">Korean Ages and Stages Questionnaires · 한강의원</div>
+      <div class="header-title">🌱 KASQ 영유아 발달 선별검사</div>
+      <div class="header-sub">한강의원</div>
     </div>
-  </div>
-</header>
-
-<main class="main">
-  <div class="main-tabs">
-    <button class="main-tab-btn active" id="tab-exam-btn" onclick="switchMainTab('exam')">📋 검사 등록</button>
-    <button class="main-tab-btn" id="tab-results-btn" onclick="switchMainTab('results')">📊 검사 결과</button>
-  </div>
-
-  <!-- 검사 등록 패널 -->
-  <div id="panel-exam">
-    <div class="card">
-      <div class="card-title">👶 기본 정보 입력</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">아이 이름</label>
-          <input class="form-input" id="inp-name" placeholder="이름 입력" oninput="updateAge()">
-        </div>
-        <div class="form-group">
-          <label class="form-label">검사일</label>
-          <input class="form-input" type="date" id="inp-date">
-        </div>
-        <div class="form-group">
-          <label class="form-label">출생연도</label>
-          <input class="form-input" id="inp-year" placeholder="예: 2023" type="number" min="2020" max="2026" oninput="updateAge()">
-        </div>
-        <div class="form-group">
-          <label class="form-label">출생월</label>
-          <select class="form-input" id="inp-month" onchange="updateAge()">
-            <option value="">월 선택</option>
-            <option value="1">1월</option>
-            <option value="2">2월</option>
-            <option value="3">3월</option>
-            <option value="4">4월</option>
-            <option value="5">5월</option>
-            <option value="6">6월</option>
-            <option value="7">7월</option>
-            <option value="8">8월</option>
-            <option value="9">9월</option>
-            <option value="10">10월</option>
-            <option value="11">11월</option>
-            <option value="12">12월</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">성별</label>
-          <div class="gender-row">
-            <button class="gender-btn" id="g-m" onclick="setGender('남')">👦 남아</button>
-            <button class="gender-btn" id="g-f" onclick="setGender('여')">👧 여아</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">검사자</label>
-          <input class="form-input" id="inp-examiner" placeholder="검사자 이름">
-        </div>
-      </div>
-      <div style="margin-top:14px;padding:12px 16px;background:var(--primary-light);border-radius:10px;font-size:14px;font-weight:700;color:var(--primary-dark);" id="age-display">
-        📅 생년월일을 입력하면 개월 수가 자동 계산됩니다
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🗓 검사 연령 구간 선택</div>
-      <div class="age-grid" id="age-grid">
-        <!-- JS로 생성 -->
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">📡 검사 방식 선택</div>
-      <div class="mode-grid">
-        <div class="mode-card" id="mode-link" onclick="selectMode('link')">
-          <span class="mode-icon">🔗</span>
-          <span class="mode-label">링크 검사</span>
-        </div>
-        <div class="mode-card" id="mode-qr" onclick="selectMode('qr')">
-          <span class="mode-icon">📷</span>
-          <span class="mode-label">QR 검사</span>
-        </div>
-        <div class="mode-card" id="mode-direct" onclick="selectMode('direct')">
-          <span class="mode-icon">✏️</span>
-          <span class="mode-label">직접 검사</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn-primary" onclick="startExam()" style="flex:1;justify-content:center;">
-        🚀 검사 시작
-      </button>
-    </div>
-  </div>
-
-  <!-- 결과 조회 패널 -->
-  <div id="panel-results" style="display:none;">
-    <div class="card">
-      <div class="card-title">📊 검사 결과 관리</div>
-      <div class="filter-row">
-        <button class="filter-btn" id="filter-all" onclick="setFilter('all')">전체</button>
-        <button class="filter-btn" id="filter-completed" onclick="setFilter('completed')">완료</button>
-        <button class="filter-btn" id="filter-pending" onclick="setFilter('pending')">진행중</button>
-      </div>
-      <button class="btn-secondary" onclick="loadSessionList()" style="margin-bottom:14px;">🔄 새로고침</button>
-      <div id="session-list">
-        <div class="empty-state">📋 검사 결과를 불러오는 중...</div>
-      </div>
-    </div>
-  </div>
-</main>
-
-<!-- 직접 검사 모달 -->
-<div id="direct-modal" style="display:none;">
-  <div style="position:fixed;inset:0;background:#f0fdf4;overflow-y:auto;z-index:150;">
-    <div style="max-width:700px;margin:0 auto;padding:20px 16px 80px;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-        <button onclick="closeDirectExam()" style="background:white;border:2px solid var(--slate-200);border-radius:10px;padding:8px 14px;font-family:inherit;font-weight:700;cursor:pointer;">← 뒤로</button>
-        <div>
-          <div style="font-size:17px;font-weight:800;" id="direct-title">검사</div>
-          <div style="font-size:12px;color:var(--slate-500);" id="direct-subtitle"></div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <div class="progress-bar" style="flex:1;margin-bottom:0;"><div class="progress-fill" id="direct-progress" style="width:0%"></div></div>
-        <div id="direct-progress-text" style="font-size:12px;font-weight:700;color:var(--primary);white-space:nowrap;">0%</div>
-      </div>
-      <div id="direct-questions"></div>
-      <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn-primary" onclick="submitDirectExam()" style="flex:1;justify-content:center;">✅ 검사 완료 및 결과 보기</button>
-      </div>
+    <div style="display:flex;align-items:center;gap:10px;" id="header-progress-wrap" style="display:none!important;">
+      <div class="progress-wrap"><div class="progress-fill" id="hdr-progress"></div></div>
+      <div class="progress-label" id="hdr-label">0%</div>
     </div>
   </div>
 </div>
 
-<!-- 링크/QR 모달 -->
-<div id="share-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
-  <div class="modal-box">
-    <div id="share-modal-content"></div>
+<div class="main">
+
+  <!-- 로딩 -->
+  <div class="screen active" id="screen-loading">
+    <div class="loading">
+      <div class="spinner"></div>
+      <div>검사 정보를 불러오는 중...</div>
+    </div>
   </div>
+
+  <!-- 에러 -->
+  <div class="screen" id="screen-error">
+    <div class="error-card">
+      <div class="error-emoji">⚠️</div>
+      <div class="error-title" id="err-title">오류가 발생했습니다</div>
+      <div class="error-msg" id="err-msg">링크가 만료되었거나 잘못된 접근입니다.</div>
+    </div>
+  </div>
+
+  <!-- 환영 -->
+  <div class="screen" id="screen-welcome">
+    <div class="welcome-card">
+      <div class="welcome-emoji">👶</div>
+      <div class="welcome-title">발달 선별검사</div>
+      <div class="welcome-sub">아이의 발달 상태를 확인하는 검사입니다.<br>아이를 가장 잘 아는 보호자가 답변해 주세요.</div>
+    </div>
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">아이 이름</span>
+        <span class="info-value" id="info-name">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">검사 구간</span>
+        <span class="info-value" id="info-age">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">총 문항 수</span>
+        <span class="info-value" id="info-total">—</span>
+      </div>
+    </div>
+    <div class="notice-box">
+      📋 <strong>답변 방법</strong><br>
+      각 문항을 읽고 아이의 현재 수준에 가장 가까운 것을 선택해 주세요.<br>
+      · <strong>1 - 못함</strong>: 아직 하지 못한다<br>
+      · <strong>2 - 할 수 있음</strong>: 할 수 있지만 잘하지는 못한다<br>
+      · <strong>3 - 잘 함</strong>: 잘할 수 있다<br><br>
+      추가 질문은 <strong>예 / 아니오</strong>로 답해 주세요.
+    </div>
+    <button class="btn-primary" onclick="startExam()">🚀 검사 시작하기</button>
+  </div>
+
+  <!-- 검사 -->
+  <div class="screen" id="screen-exam">
+    <div id="exam-questions"></div>
+  </div>
+
+  <!-- 완료 -->
+  <div class="screen" id="screen-done">
+    <div class="done-card">
+      <div class="done-emoji">🎉</div>
+      <div class="done-title">검사가 완료되었습니다!</div>
+      <div class="done-sub">
+        답변이 성공적으로 저장되었습니다.<br>
+        담당 선생님께서 결과를 확인하실 예정입니다.<br><br>
+        창을 닫으셔도 됩니다.
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<!-- 결과 상세 모달 -->
-<div id="result-modal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
-  <div class="modal-box" style="max-width:560px;">
-    <div id="result-modal-content"></div>
+<!-- 하단 제출 버튼 (검사 화면에서만) -->
+<div class="bottom-bar" id="bottom-bar" style="display:none;">
+  <div class="bottom-inner">
+    <button class="btn-primary" id="submit-btn" onclick="submitExam()">
+      ✅ 검사 완료 및 제출
+    </button>
   </div>
 </div>
 
 <script>
-// ──────────────────────────────────────────
-// KASQ 검사 데이터
-// ──────────────────────────────────────────
 const KASQ_DATA = {
   "4-5": {
     label: "4~5개월",
@@ -1927,8 +1643,6 @@ const KASQ_DATA = {
   }
 };
 
-const AGE_KEYS = Object.keys(KASQ_DATA);
-
 // ──────────────────────────────────────────
 // Supabase
 // ──────────────────────────────────────────
@@ -1951,211 +1665,116 @@ async function sbFetch(path, opts = {}) {
   return res.status === 204 ? null : res.json();
 }
 
-function genSessionId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-}
-
 // ──────────────────────────────────────────
 // 상태
 // ──────────────────────────────────────────
-let state = {
-  childName: "", gender: "", birthYear: null, birthMonth: null,
-  examDate: "", examiner: "", selectedAge: null, selectedMode: null,
-  currentSessionId: null,
-  directAnswers: {}, directExtra: {}
-};
-
-// ──────────────────────────────────────────
-// 초기화
-// ──────────────────────────────────────────
-window.onload = () => {
-  // 오늘 날짜 기본값
-  document.getElementById("inp-date").value = new Date().toISOString().split("T")[0];
-
-  // 연령 버튼 생성
-  const grid = document.getElementById("age-grid");
-  AGE_KEYS.forEach(k => {
-    const d = KASQ_DATA[k];
-    const btn = document.createElement("button");
-    btn.className = "age-btn";
-    btn.id = "age-" + k;
-    btn.textContent = d.label;
-    btn.onclick = () => selectAge(k);
-    grid.appendChild(btn);
-  });
-
-  loadSessionList();
-};
-
-function setGender(g) {
-  state.gender = g;
-  document.getElementById("g-m").classList.toggle("active", g === "남");
-  document.getElementById("g-f").classList.toggle("active", g === "여");
-}
-
-function updateAge() {
-  state.childName = document.getElementById("inp-name").value.trim();
-  const y = parseInt(document.getElementById("inp-year").value);
-  const m = parseInt(document.getElementById("inp-month").value);
-  state.birthYear = y; state.birthMonth = m;
-  const disp = document.getElementById("age-display");
-  if (y && m) {
-    const now = new Date();
-    const birth = new Date(y, m - 1, 1);
-    const months = (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
-    disp.textContent = `📅 현재 ${months}개월 (${y}년 ${m}월생)`;
-    // 해당 구간 자동 선택
-    const key = getAgeKeyForMonths(months);
-    if (key) selectAge(key);
-  } else {
-    disp.textContent = "📅 생년월일을 입력하면 개월 수가 자동 계산됩니다";
-  }
-}
-
-function getAgeKeyForMonths(m) {
-  if (m < 4) return null;
-  if (m <= 5) return "4-5";
-  if (m <= 7) return "6-7";
-  if (m <= 9) return "8-9";
-  if (m <= 11) return "10-11";
-  if (m <= 13) return "12-13";
-  if (m <= 15) return "14-15";
-  if (m <= 17) return "16-17";
-  if (m <= 19) return "18-19";
-  if (m <= 21) return "20-21";
-  if (m <= 23) return "22-23";
-  if (m <= 26) return "24-26";
-  if (m <= 29) return "27-29";
-  if (m <= 32) return "30-32";
-  if (m <= 35) return "33-35";
-  if (m <= 41) return "36-41";
-  if (m <= 47) return "42-47";
-  if (m <= 53) return "48-53";
-  if (m <= 59) return "54-59";
-  if (m <= 65) return "60-65";
-  return "66-71";
-}
-
-function getAge() { return state.selectedAge ? KASQ_DATA[state.selectedAge].label : ""; }
-
-function selectAge(key) {
-  state.selectedAge = key;
-  AGE_KEYS.forEach(k => document.getElementById("age-" + k)?.classList.toggle("active", k === key));
-}
-
-function selectMode(m) {
-  state.selectedMode = m;
-  ["link","qr","direct"].forEach(id => document.getElementById("mode-" + id)?.classList.toggle("active", id === m));
-}
-
-// ──────────────────────────────────────────
-// 검사 시작
-// ──────────────────────────────────────────
-async function startExam() {
-  state.childName = document.getElementById("inp-name").value.trim();
-  state.examDate = document.getElementById("inp-date").value;
-  state.examiner = document.getElementById("inp-examiner").value.trim();
-
-  if (!state.childName) { alert("아이 이름을 입력해 주세요."); return; }
-  if (!state.selectedAge) { alert("검사 연령 구간을 선택해 주세요."); return; }
-  if (!state.selectedMode) { alert("검사 방식을 선택해 주세요."); return; }
-
-  if (state.selectedMode === "direct") {
-    openDirectExam();
-  } else {
-    const url = await createSessionAndGetUrl();
-    showShareModal(state.selectedMode, url);
-  }
-}
-
-async function createSessionAndGetUrl() {
-  const sessionId = genSessionId();
-  try {
-    await sbFetch("kasq_sessions", {
-      method: "POST",
-      body: {
-        session_id: sessionId,
-        child_name: state.childName,
-        child_age: getAge(),
-        gender: state.gender,
-        examiner: state.examiner,
-        exam_date: state.examDate || new Date().toISOString().split("T")[0],
-        age_key: state.selectedAge,
-        status: "pending"
-      }
-    });
-  } catch(e) {
-    console.warn("Supabase 저장 실패:", e.message);
-  }
-  state.currentSessionId = sessionId;
-  return `${window.location.origin}${window.location.pathname.replace('kasq_admin.html','kasq_exam.html')}?sid=${sessionId}&name=${encodeURIComponent(state.childName)}&age=${state.selectedAge}`;
-}
-
-function showShareModal(mode, url) {
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-  document.getElementById("share-modal-content").innerHTML = `
-    <div style="font-size:17px;font-weight:800;color:#0f172a;margin-bottom:4px;">${mode==="qr"?"📷 QR 검사":"🔗 링크 검사"}</div>
-    <div style="font-size:13px;color:#64748b;margin-bottom:16px;">${state.childName} · ${getAge()}</div>
-    ${mode==="qr" ? `<div style="text-align:center;margin-bottom:16px;"><img src="${qrUrl}" style="border-radius:12px;border:2px solid #e2e8f0;" alt="QR코드"></div>` : ""}
-    <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:8px;">검사 링크</div>
-    <div class="url-box">${url}</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn-primary" style="flex:1;justify-content:center;" onclick="navigator.clipboard.writeText('${url}').then(()=>alert('링크가 복사되었습니다'))">📋 링크 복사</button>
-      <button class="btn-secondary" onclick="document.getElementById('share-modal').style.display='none'">닫기</button>
-    </div>
-  `;
-  document.getElementById("share-modal").style.display = "flex";
-}
-
-// ──────────────────────────────────────────
-// 직접 검사 (전 영역 스크롤 방식)
-// ──────────────────────────────────────────
-function openDirectExam() {
-  const data = KASQ_DATA[state.selectedAge];
-  state.directAnswers = {};
-  state.directExtra = {};
-  document.getElementById("direct-title").textContent = `${state.childName} · KASQ ${data.label}`;
-  document.getElementById("direct-subtitle").textContent = `${state.examiner || "검사자"} · ${state.examDate || "오늘"}`;
-  renderAllQuestions(data);
-  document.getElementById("direct-modal").style.display = "block";
-}
-
-function closeDirectExam() {
-  document.getElementById("direct-modal").style.display = "none";
-}
+let session = null;         // Supabase 세션 row
+let examData = null;        // KASQ_DATA[age_key]
+let answers = {};           // { "대근육운동_0": 2, ... }
+let extraAnswers = {};      // { 0: true, ... }
 
 const DOMAIN_COLORS = {
-  "대근육운동": { bg:"#eff6ff", border:"#3b82f6", badge:"#2563eb" },
-  "소근육운동": { bg:"#f0fdf4", border:"#22c55e", badge:"#16a34a" },
-  "인지":       { bg:"#fdf4ff", border:"#a855f7", badge:"#7c3aed" },
-  "언어":       { bg:"#fff7ed", border:"#f97316", badge:"#ea580c" },
-  "사회성":     { bg:"#fef2f2", border:"#ef4444", badge:"#dc2626" },
-  "자조":       { bg:"#fefce8", border:"#eab308", badge:"#ca8a04" },
+  "대근육운동": { bg:"#eff6ff", border:"#3b82f6", badge:"#2563eb", borderop:"#3b82f620" },
+  "소근육운동": { bg:"#f0fdf4", border:"#22c55e", badge:"#16a34a", borderop:"#22c55e20" },
+  "인지":       { bg:"#fdf4ff", border:"#a855f7", badge:"#7c3aed", borderop:"#a855f720" },
+  "언어":       { bg:"#fff7ed", border:"#f97316", badge:"#ea580c", borderop:"#f9731620" },
+  "사회성":     { bg:"#fef2f2", border:"#ef4444", badge:"#dc2626", borderop:"#ef444420" },
+  "자조":       { bg:"#fefce8", border:"#eab308", badge:"#ca8a04", borderop:"#eab30820" },
 };
 
-function renderAllQuestions(data) {
-  const el = document.getElementById("direct-questions");
+// ──────────────────────────────────────────
+// 진입점: URL 파라미터 파싱 후 세션 조회
+// ──────────────────────────────────────────
+async function init() {
+  const params = new URLSearchParams(location.search);
+  const sid = params.get("sid");
+
+  if (!sid) {
+    showError("잘못된 링크", "세션 ID가 없습니다. 담당 선생님께 문의해 주세요.");
+    return;
+  }
+
+  try {
+    const rows = await sbFetch(`kasq_sessions?session_id=eq.${sid}&select=*`);
+    if (!rows || rows.length === 0) {
+      showError("세션을 찾을 수 없음", "링크가 만료되었거나 잘못된 접근입니다.");
+      return;
+    }
+    session = rows[0];
+
+    if (session.status === "completed") {
+      showError("이미 완료된 검사", "이미 검사가 완료되었습니다. 담당 선생님께 문의해 주세요.");
+      return;
+    }
+
+    examData = KASQ_DATA[session.age_key];
+    if (!examData) {
+      showError("데이터 오류", `연령 구간(${session.age_key})을 찾을 수 없습니다.`);
+      return;
+    }
+
+    showWelcome();
+  } catch(e) {
+    showError("네트워크 오류", e.message);
+  }
+}
+
+// ──────────────────────────────────────────
+// 화면 전환
+// ──────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function showError(title, msg) {
+  document.getElementById("err-title").textContent = title;
+  document.getElementById("err-msg").textContent = msg;
+  showScreen("screen-error");
+}
+
+function showWelcome() {
+  const total = examData.domains.reduce((s, d) => s + (examData.items[d]||[]).length, 0);
+  document.getElementById("info-name").textContent = session.child_name || "—";
+  document.getElementById("info-age").textContent = examData.label;
+  document.getElementById("info-total").textContent = `${total}문항` + (examData.extra.length > 0 ? ` + 추가 ${examData.extra.length}문항` : "");
+  showScreen("screen-welcome");
+}
+
+function startExam() {
+  renderExam();
+  showScreen("screen-exam");
+  document.getElementById("bottom-bar").style.display = "block";
+  document.getElementById("header-progress-wrap").style.display = "flex";
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+// ──────────────────────────────────────────
+// 검사 렌더링
+// ──────────────────────────────────────────
+function renderExam() {
+  const el = document.getElementById("exam-questions");
   let html = "";
 
-  // 각 영역 순서대로 렌더
-  data.domains.forEach(domain => {
-    const col = DOMAIN_COLORS[domain] || { bg:"#f8fafc", border:"#94a3b8", badge:"#475569" };
-    const items = data.items[domain] || [];
+  examData.domains.forEach(domain => {
+    const col = DOMAIN_COLORS[domain] || { bg:"#f8fafc", border:"#94a3b8", badge:"#475569", borderop:"#94a3b820" };
+    const items = examData.items[domain] || [];
     html += `
-      <div class="domain-section" id="section-${domain}" style="background:${col.bg};border:2px solid ${col.border};border-radius:16px;margin-bottom:20px;overflow:hidden;">
-        <div style="padding:14px 18px 10px;border-bottom:1px solid ${col.border}20;">
-          <span style="background:${col.badge};color:white;font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px;">${domain}</span>
-          <span id="domain-count-${domain}" style="font-size:12px;color:#64748b;margin-left:10px;">0 / ${items.length}</span>
+      <div class="domain-section" style="background:${col.bg};border:2px solid ${col.border};">
+        <div class="domain-header" style="border-bottom-color:${col.borderop};">
+          <span class="domain-badge" style="background:${col.badge};">${domain}</span>
+          <span class="domain-cnt" id="dc-${domain}">0 / ${items.length}</span>
         </div>
-        <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px;">
+        <div class="domain-body">
           ${items.map((q, i) => {
             const key = `${domain}_${i}`;
-            return `<div class="question-item" id="qi-${key}" style="background:white;border-radius:12px;padding:14px;border:2px solid transparent;">
-              <div class="question-text" style="margin-bottom:10px;">${i+1}. ${q}</div>
+            return `<div class="question-item" id="qi-${key}">
+              <div class="question-text">${i+1}. ${q}</div>
               <div class="answer-row">
-                <button class="answer-btn" onclick="setAnswer('${key}',1,'${domain}')">1<br><span style="font-size:11px;">못함</span></button>
-                <button class="answer-btn" onclick="setAnswer('${key}',2,'${domain}')">2<br><span style="font-size:11px;">할 수 있음</span></button>
-                <button class="answer-btn" onclick="setAnswer('${key}',3,'${domain}')">3<br><span style="font-size:11px;">잘 함</span></button>
+                <button class="answer-btn" onclick="setAns('${key}',1,'${domain}')">1<span class="ans-label">못함</span></button>
+                <button class="answer-btn" onclick="setAns('${key}',2,'${domain}')">2<span class="ans-label">할 수 있음</span></button>
+                <button class="answer-btn" onclick="setAns('${key}',3,'${domain}')">3<span class="ans-label">잘 함</span></button>
               </div>
             </div>`;
           }).join("")}
@@ -2163,21 +1782,20 @@ function renderAllQuestions(data) {
       </div>`;
   });
 
-  // 추가질문
-  if (data.extra && data.extra.length > 0) {
+  if (examData.extra && examData.extra.length > 0) {
     html += `
-      <div class="domain-section" style="background:#fef9c3;border:2px solid #f59e0b;border-radius:16px;margin-bottom:20px;overflow:hidden;">
-        <div style="padding:14px 18px 10px;border-bottom:1px solid #f59e0b40;">
-          <span style="background:#f59e0b;color:white;font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px;">⚠️ 추가 질문</span>
-          <span style="font-size:12px;color:#92400e;margin-left:10px;">예 / 아니오로 답해 주세요</span>
+      <div class="domain-section" style="background:#fef9c3;border:2px solid #f59e0b;">
+        <div class="domain-header" style="border-bottom-color:#f59e0b40;">
+          <span class="domain-badge" style="background:#f59e0b;">⚠️ 추가 질문</span>
+          <span class="domain-cnt">예 / 아니오로 답해 주세요</span>
         </div>
-        <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px;">
-          ${data.extra.map((q, i) => `
-            <div class="extra-q-item" id="eqi-${i}" style="background:white;border-radius:12px;padding:14px;border:2px solid transparent;">
-              <div class="extra-q-text" style="margin-bottom:10px;">${i+1}. ${q}</div>
+        <div class="domain-body">
+          ${examData.extra.map((q, i) => `
+            <div class="extra-q-item" id="eqi-${i}">
+              <div class="extra-q-text">${i+1}. ${q}</div>
               <div class="yn-row">
-                <button class="yn-btn" onclick="setExtra(${i}, true)">예</button>
-                <button class="yn-btn" onclick="setExtra(${i}, false)">아니오</button>
+                <button class="yn-btn" id="yn-y-${i}" onclick="setExtra(${i}, true)">예</button>
+                <button class="yn-btn" id="yn-n-${i}" onclick="setExtra(${i}, false)">아니오</button>
               </div>
             </div>`).join("")}
         </div>
@@ -2185,259 +1803,102 @@ function renderAllQuestions(data) {
   }
 
   el.innerHTML = html;
-  updateProgress(data);
 }
 
-function setAnswer(key, val, domain) {
-  state.directAnswers[key] = val;
-  // 해당 문항 UI만 업데이트 (전체 리렌더 없이)
+function setAns(key, val, domain) {
+  answers[key] = val;
   const qi = document.getElementById(`qi-${key}`);
   if (qi) {
-    const btns = qi.querySelectorAll(".answer-btn");
-    btns.forEach((b, idx) => {
+    qi.querySelectorAll(".answer-btn").forEach((b, idx) => {
       b.classList.remove("sel-1","sel-2","sel-3");
       if (idx + 1 === val) b.classList.add(`sel-${val}`);
     });
-    qi.style.border = "2px solid #22c55e";
+    qi.classList.add("answered");
   }
-  const data = KASQ_DATA[state.selectedAge];
-  // 도메인 카운트 업데이트
-  if (domain) {
-    const items = data.items[domain] || [];
-    const answered = items.filter((_, i) => state.directAnswers[`${domain}_${i}`] !== undefined).length;
-    const cntEl = document.getElementById(`domain-count-${domain}`);
-    if (cntEl) cntEl.textContent = `${answered} / ${items.length}`;
-  }
-  updateProgress(data);
+  // 도메인 카운트
+  const items = examData.items[domain] || [];
+  const cnt = items.filter((_, i) => answers[`${domain}_${i}`] !== undefined).length;
+  const dcEl = document.getElementById(`dc-${domain}`);
+  if (dcEl) dcEl.textContent = `${cnt} / ${items.length}`;
+  updateProgress();
 }
 
 function setExtra(idx, val) {
-  state.directExtra[idx] = val;
+  extraAnswers[idx] = val;
   const eqi = document.getElementById(`eqi-${idx}`);
-  if (eqi) {
-    const btns = eqi.querySelectorAll(".yn-btn");
-    btns[0].classList.toggle("yn-y", val === true);
-    btns[0].classList.toggle("yn-n", false);
-    btns[1].classList.toggle("yn-n", val === false);
-    btns[1].classList.toggle("yn-y", false);
-    eqi.style.border = "2px solid #22c55e";
-  }
+  if (eqi) eqi.classList.add("answered");
+  const yBtn = document.getElementById(`yn-y-${idx}`);
+  const nBtn = document.getElementById(`yn-n-${idx}`);
+  if (yBtn) { yBtn.classList.toggle("yn-y", val === true); yBtn.classList.remove("yn-n"); }
+  if (nBtn) { nBtn.classList.toggle("yn-n", val === false); nBtn.classList.remove("yn-y"); }
 }
 
-function updateProgress(data) {
-  const total = data.domains.reduce((s, d) => s + (data.items[d] || []).length, 0);
-  const answered = Object.keys(state.directAnswers).length;
+function updateProgress() {
+  const total = examData.domains.reduce((s, d) => s + (examData.items[d]||[]).length, 0);
+  const answered = Object.keys(answers).length;
   const pct = total > 0 ? Math.round(answered / total * 100) : 0;
-  document.getElementById("direct-progress").style.width = `${pct}%`;
-  const txt = document.getElementById("direct-progress-text");
-  if (txt) txt.textContent = `${answered}/${total} (${pct}%)`;
+  document.getElementById("hdr-progress").style.width = `${pct}%`;
+  document.getElementById("hdr-label").textContent = `${pct}%`;
+  const btn = document.getElementById("submit-btn");
+  if (btn) btn.disabled = answered < total;
 }
 
-async function submitDirectExam() {
-  const data = KASQ_DATA[state.selectedAge];
+// ──────────────────────────────────────────
+// 제출
+// ──────────────────────────────────────────
+async function submitExam() {
+  const data = examData;
+  const total = data.domains.reduce((s, d) => s + (data.items[d]||[]).length, 0);
+  const answered = Object.keys(answers).length;
+
+  if (answered < total) {
+    const remaining = total - answered;
+    if (!confirm(`아직 ${remaining}개 문항에 답하지 않았습니다.\n미답 문항은 '못함(1)'으로 처리됩니다.\n제출하시겠습니까?`)) return;
+    // 미답 문항 1로 채우기
+    data.domains.forEach(domain => {
+      (data.items[domain]||[]).forEach((_, i) => {
+        const key = `${domain}_${i}`;
+        if (answers[key] === undefined) answers[key] = 1;
+      });
+    });
+  }
+
+  // 점수 계산
   const scores = {};
-  data.domains.forEach(d => {
+  data.domains.forEach(domain => {
     let sum = 0;
-    (data.items[d] || []).forEach((_, i) => { sum += state.directAnswers[`${d}_${i}`] || 1; });
-    scores[d] = sum;
+    (data.items[domain]||[]).forEach((_, i) => { sum += answers[`${domain}_${i}`] || 1; });
+    scores[domain] = sum;
   });
 
-  const sessionId = genSessionId();
-  const resultData = {
-    session_id: sessionId,
-    child_name: state.childName,
-    child_age: getAge(),
-    gender: state.gender,
-    examiner: state.examiner,
-    exam_date: state.examDate,
-    age_key: state.selectedAge,
-    status: "completed",
-    answers: state.directAnswers,
-    extra_answers: state.directExtra,
-    scores: scores
-  };
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "저장 중...";
 
   try {
-    await sbFetch("kasq_sessions", { method: "POST", body: resultData });
+    await sbFetch(`kasq_sessions?session_id=eq.${session.session_id}`, {
+      method: "PATCH",
+      body: {
+        status: "completed",
+        answers: answers,
+        extra_answers: extraAnswers,
+        scores: scores
+      }
+    });
+    document.getElementById("bottom-bar").style.display = "none";
+    showScreen("screen-done");
+    window.scrollTo(0, 0);
   } catch(e) {
-    console.warn("Supabase 저장 실패:", e.message);
-  }
-
-  closeDirectExam();
-  showResultDetail(resultData);
-}
-
-// ──────────────────────────────────────────
-// 결과 목록
-// ──────────────────────────────────────────
-let allSessions = [];
-let currentFilter = "all";
-
-async function loadSessionList() {
-  const el = document.getElementById("session-list");
-  el.innerHTML = '<div class="empty-state">🔄 불러오는 중...</div>';
-  try {
-    const rows = await sbFetch("kasq_sessions?select=*&order=created_at.desc&limit=50");
-    allSessions = rows || [];
-    renderSessionList();
-  } catch(e) {
-    el.innerHTML = `<div class="empty-state">⚠️ 불러오기 실패: ${e.message}<br><small>Supabase kasq_sessions 테이블을 생성해 주세요.</small></div>`;
+    btn.disabled = false;
+    btn.textContent = "✅ 검사 완료 및 제출";
+    alert("저장 중 오류가 발생했습니다: " + e.message + "\n\n잠시 후 다시 시도해 주세요.");
   }
 }
 
-function setFilter(f) {
-  currentFilter = f;
-  ["all","completed","pending"].forEach(id => {
-    const btn = document.getElementById("filter-" + id);
-    if (btn) {
-      btn.style.background = id === f ? "var(--primary)" : "";
-      btn.style.color = id === f ? "white" : "";
-      btn.style.borderColor = id === f ? "var(--primary)" : "";
-    }
-  });
-  renderSessionList();
-}
-
-function renderSessionList() {
-  const el = document.getElementById("session-list");
-  const filtered = currentFilter === "all" ? allSessions
-    : allSessions.filter(s => s.status === currentFilter);
-  if (!filtered.length) { el.innerHTML = '<div class="empty-state">검사 결과가 없습니다</div>'; return; }
-  el.innerHTML = filtered.map(s => `
-    <div class="session-item" onclick='showResultDetail(${JSON.stringify(s)})'>
-      <div class="session-avatar ${s.gender === "여" ? "avatar-f" : "avatar-m"}">${s.gender === "여" ? "👧" : "👦"}</div>
-      <div class="session-info">
-        <div class="session-name">${s.child_name}</div>
-        <div class="session-meta">${s.child_age} · ${s.examiner || ""} · ${s.exam_date || ""}</div>
-      </div>
-      <span class="badge ${s.status === "completed" ? "badge-done" : "badge-pending"}">${s.status === "completed" ? "완료" : "진행중"}</span>
-      <button onclick="event.stopPropagation();deleteSession('${s.session_id}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;font-weight:700;">삭제</button>
-    </div>
-  `).join("");
-}
-
-async function deleteSession(sid) {
-  if (!confirm("이 검사를 삭제하시겠습니까?")) return;
-  try {
-    await sbFetch(`kasq_sessions?session_id=eq.${sid}`, { method: "DELETE", prefer: "" });
-    loadSessionList();
-  } catch(e) { alert("삭제 실패: " + e.message); }
-}
-
 // ──────────────────────────────────────────
-// 결과 상세
+// 시작
 // ──────────────────────────────────────────
-const INTERPRET_LABELS = ["심화평가권고", "추적검사요망", "또래수준", "빠른수준"];
-const INTERPRET_COLORS = ["interpret-0", "interpret-1", "interpret-2", "interpret-3"];
-
-function getInterpret(score, cutoffs) {
-  // cutoffs = [c1, c2, c3] => 0~c1미만=심화, c1~c2미만=추적, c2~c3미만=또래, c3이상=빠른
-  if (score < cutoffs[0]) return 0;
-  if (score < cutoffs[1]) return 1;
-  if (score < cutoffs[2]) return 2;
-  return 3;
-}
-
-function showResultDetail(session) {
-  const data = KASQ_DATA[session.age_key];
-  if (!data) { alert("해당 연령 데이터를 찾을 수 없습니다."); return; }
-  const scores = session.scores || {};
-  const extra = session.extra_answers || {};
-
-  let domainHtml = data.domains.map(d => {
-    const score = scores[d] || 0;
-    const max = (data.items[d] || []).length * 3;
-    const cutoffArr = data.cutoff[d] || [0, 0, 0];
-    const interp = getInterpret(score, cutoffArr);
-    const pct = max > 0 ? Math.round(score / max * 100) : 0;
-    const colors = ["#ef4444","#f59e0b","#3b82f6","#16a34a"];
-    return `<div class="result-domain">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <div class="result-domain-name">${d}</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#334155;">${score}점</span>
-          <span class="result-interpret ${INTERPRET_COLORS[interp]}">${INTERPRET_LABELS[interp]}</span>
-        </div>
-      </div>
-      <div class="result-bar-bg"><div class="result-bar-fill" style="width:${pct}%;background:${colors[interp]};"></div></div>
-      <div style="font-size:11px;color:#94a3b8;margin-top:4px;">기준: ${cutoffArr[0]}/ ${cutoffArr[1]}/ ${cutoffArr[2]}</div>
-    </div>`;
-  }).join("");
-
-  let extraHtml = "";
-  if (data.extra.length > 0) {
-    extraHtml = `<div style="margin-top:16px;"><div style="font-size:13px;font-weight:800;color:#92400e;margin-bottom:8px;">⚠️ 추가 질문</div>
-      ${data.extra.map((q, i) => {
-        const ans = extra[i];
-        if (ans === undefined) return "";
-        return `<div class="extra-item ${ans ? "extra-yes" : "extra-no"}">
-          <span>${ans ? "예" : "아니오"}</span>
-          <span style="font-size:12px;">${q}</span>
-        </div>`;
-      }).join("")}
-    </div>`;
-  }
-
-  const resultUrl = `${window.location.href}#result-${session.session_id}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(resultUrl)}`;
-
-  document.getElementById("result-modal-content").innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <div style="width:48px;height:48px;border-radius:50%;background:${session.gender==="여"?"#fce7f3":"#dbeafe"};display:flex;align-items:center;justify-content:center;font-size:22px;">${session.gender==="여"?"👧":"👦"}</div>
-      <div>
-        <div style="font-size:18px;font-weight:800;">${session.child_name}</div>
-        <div style="font-size:13px;color:#64748b;">${session.child_age} · ${session.exam_date || ""} · ${session.examiner || ""}</div>
-      </div>
-    </div>
-    ${domainHtml}
-    ${extraHtml}
-    <div class="action-row">
-      <button class="btn-primary" onclick="savePDF()" style="flex:1;justify-content:center;">📄 PDF 저장</button>
-      <button class="btn-secondary" onclick="showResultQR('${resultUrl}')" style="background:#6366f1;color:white;border-color:#6366f1;">📲 QR 공유</button>
-      <button class="btn-secondary" onclick="document.getElementById('result-modal').style.display='none'">닫기</button>
-    </div>
-  `;
-  document.getElementById("result-modal").style.display = "flex";
-}
-
-function showResultQR(url) {
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-  document.getElementById("share-modal-content").innerHTML = `
-    <div style="font-size:17px;font-weight:800;margin-bottom:4px;">📲 결과지 QR 공유</div>
-    <div style="font-size:13px;color:#64748b;margin-bottom:16px;">QR코드로 결과를 공유하세요</div>
-    <div style="text-align:center;margin-bottom:16px;"><img src="${qrUrl}" style="border-radius:12px;border:2px solid #e2e8f0;" alt="QR코드"></div>
-    <div class="url-box">${url}</div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn-primary" style="flex:1;justify-content:center;" onclick="navigator.clipboard.writeText('${url}').then(()=>alert('복사되었습니다'))">📋 링크 복사</button>
-      <button class="btn-secondary" onclick="document.getElementById('share-modal').style.display='none'">닫기</button>
-    </div>
-  `;
-  document.getElementById("share-modal").style.display = "flex";
-}
-
-async function savePDF() {
-  const el = document.getElementById("result-modal-content");
-  try {
-    const canvas = await html2canvas(el, { scale: 2, useCORS: true });
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    const w = pdf.internal.pageSize.getWidth();
-    const h = canvas.height * w / canvas.width;
-    pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, w, h);
-    pdf.save(`KASQ_결과_${new Date().toISOString().slice(0,10)}.pdf`);
-  } catch(e) { alert("PDF 저장 오류: " + e.message); }
-}
-
-// ──────────────────────────────────────────
-// 탭 전환
-// ──────────────────────────────────────────
-function switchMainTab(tab) {
-  document.getElementById("tab-exam-btn").classList.toggle("active", tab === "exam");
-  document.getElementById("tab-results-btn").classList.toggle("active", tab === "results");
-  document.getElementById("panel-exam").style.display = tab === "exam" ? "block" : "none";
-  document.getElementById("panel-results").style.display = tab === "results" ? "block" : "none";
-  if (tab === "results") loadSessionList();
-}
+init();
 </script>
 </body>
 </html>
